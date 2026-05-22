@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "bo17riyaz@gmail.com";
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+
+    match /parties/{partyId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(partyId);
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(productId);
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /rates/{rateId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(rateId);
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /invoices/{invoiceId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(invoiceId);
+      allow update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+  }
+}

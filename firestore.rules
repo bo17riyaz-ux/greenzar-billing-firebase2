@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (request.auth.token.email == "bo17riyaz@gmail.com");
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validation Blueprints ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['username', 'role']) &&
+             data.username is string && data.username.size() <= 128 &&
+             data.role is string && data.role.size() <= 64;
+    }
+
+    function isValidParty(data) {
+      return data.keys().hasAll(['name', 'address', 'city', 'phone', 'gst_number']) &&
+             data.name is string && data.name.size() <= 128 &&
+             data.address is string && data.address.size() <= 500 &&
+             data.city is string && data.city.size() <= 128 &&
+             data.phone is string && data.phone.size() <= 64 &&
+             data.gst_number is string && data.gst_number.size() <= 64;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'code', 'standard_rate', 'unit']) &&
+             data.name is string && data.name.size() <= 128 &&
+             data.code is string && data.code.size() <= 64 &&
+             (data.standard_rate is number || data.standard_rate is string) &&
+             data.unit is string && data.unit.size() <= 64;
+    }
+
+    function isValidRate(data) {
+      return data.keys().hasAll(['party_id', 'rates']) &&
+             data.party_id is string && data.party_id.size() <= 128;
+    }
+
+    function isValidInvoice(data) {
+      return data.keys().hasAll(['invoiceNumber', 'partyId', 'partyName', 'date', 'subTotal', 'taxAmount', 'globalDiscount', 'grandTotal', 'userId']) &&
+             data.invoiceNumber is string && data.invoiceNumber.size() <= 128 &&
+             data.partyId is string && data.partyId.size() <= 128 &&
+             data.partyName is string && data.partyName.size() <= 128 &&
+             data.date is string && data.date.size() <= 64 &&
+             (data.subTotal is number || data.subTotal is string) &&
+             (data.taxAmount is number || data.taxAmount is string) &&
+             (data.globalDiscount is number || data.globalDiscount is string) &&
+             (data.grandTotal is number || data.grandTotal is string) &&
+             data.userId is string && data.userId.size() <= 128 &&
+             (data.userId == request.auth.uid || isAdmin());
+    }
+
+    // --- Collection Rules ---
+
+    match /app_users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /parties/{partyId} {
+      allow read: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /products/{productId} {
+      allow read: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /special_rates/{rateId} {
+      allow read: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /invoices/{invoiceId} {
+      allow read: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+    }
+  }
+}

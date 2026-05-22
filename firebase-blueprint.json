@@ -1,0 +1,139 @@
+{
+  "entities": {
+    "Party": {
+      "title": "Party",
+      "description": "A customer or vendor entity.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "phone": { "type": "string" },
+        "gstNumber": { "type": "string" },
+        "aadharNumber": { "type": "string" },
+        "panNumber": { "type": "string" },
+        "email": { "type": "string" },
+        "state": { "type": "string" },
+        "pincode": { "type": "string" }
+      },
+      "required": ["id", "name", "address", "city", "phone", "gstNumber", "aadharNumber", "panNumber"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Item sold.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "standardRate": { "type": "number" },
+        "unit": { "type": "string" },
+        "hsn": { "type": "string" },
+        "gstPercent": { "type": "number" },
+        "qtyPerCase": { "type": "number" },
+        "weight": { "type": "string" }
+      },
+      "required": ["id", "name", "code", "standardRate", "unit"]
+    },
+    "SpecialRate": {
+      "title": "SpecialRate",
+      "description": "Specific rate for a product for a party.",
+      "type": "object",
+      "properties": {
+        "partyId": { "type": "string" },
+        "productId": { "type": "string" },
+        "rate": { "type": "number" }
+      },
+      "required": ["partyId", "productId", "rate"]
+    },
+    "InvoiceItem": {
+      "title": "InvoiceItem",
+      "description": "Item in an invoice.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "quantity": { "type": "number" },
+        "rate": { "type": "number" },
+        "baseRate": { "type": "number" },
+        "total": { "type": "number" },
+        "hsn": { "type": "string" },
+        "gstPercent": { "type": "number" },
+        "weight": { "type": "string" }
+      },
+      "required": ["id", "productId", "productName", "quantity", "rate", "baseRate", "total"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Invoice for a party.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "partyId": { "type": "string" },
+        "partyName": { "type": "string" },
+        "date": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/entities/InvoiceItem" }
+        },
+        "subTotal": { "type": "number" },
+        "taxPercent": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "globalDiscount": { "type": "number" },
+        "grandTotal": { "type": "number" },
+        "vehicleNumber": { "type": "string" },
+        "poNumber": { "type": "string" },
+        "partyAddress": { "type": "string" },
+        "partyGst": { "type": "string" },
+        "partyPan": { "type": "string" },
+        "partyAadhar": { "type": "string" },
+        "partyPhone": { "type": "string" },
+        "totalWeight": { "type": "string" },
+        "previousBalance": { "type": "number" },
+        "totalBalance": { "type": "number" },
+        "showLedger": { "type": "boolean" },
+        "syncStatus": { "type": "string" },
+        "lastUpdated": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "invoiceNumber", "partyId", "partyName", "date", "subTotal", "taxAmount", "globalDiscount", "grandTotal"]
+    },
+    "User": {
+      "title": "User",
+      "description": "System user.",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "role": { "type": "string" }
+      },
+      "required": ["username", "password"]
+    }
+  },
+  "firestore": {
+    "/parties/{partyId}": {
+      "schema": "Party",
+      "description": "Customers/vendors pool."
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Available products."
+    },
+    "/rates/{rateId}": {
+      "schema": "SpecialRate",
+      "description": "Special rate mapping per Party-Product."
+    },
+    "/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Generated invoices."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Authorized users of the system."
+    }
+  }
+}
